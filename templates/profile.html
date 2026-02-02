@@ -1,54 +1,43 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
 {% block content %}
 
-<div class="row g-4">
+<h2 class="text-3xl font-bold mb-6">My Profile</h2>
 
-<!-- LEFT -->
-<div class="col-md-4">
-  <div class="glass p-4 text-center" data-aos="zoom-in">
-    <i class="bi bi-person-circle fs-1 text-primary"></i>
-    <h4 class="mt-2">{{ student.name }}</h4>
-    <p class="text-muted">{{ student.email }}</p>
-    <span class="badge bg-success">CGPA {{ student.cgpa }}</span>
+<div class="bg-white/10 p-6 rounded-xl backdrop-blur mb-8">
+    <p><b>Name:</b> {{ student.name }}</p>
+    <p><b>Email:</b> {{ student.email }}</p>
+    <p><b>CGPA:</b> {{ student.cgpa }}</p>
 
     {% if student.resume_path %}
-    <a href="/{{ student.resume_path }}" target="_blank"
-       class="btn btn-outline-primary w-100 mt-3">
-       View Resume
-    </a>
+        <a href="/{{ student.resume_path }}" class="text-cyan-400 underline mt-2 inline-block">
+            View Resume
+        </a>
     {% endif %}
-  </div>
 </div>
 
-<!-- RIGHT -->
-<div class="col-md-8">
+<form method="POST" enctype="multipart/form-data"
+      class="bg-white/10 p-6 rounded-xl backdrop-blur mb-8">
+    <h3 class="font-semibold mb-3">Upload Resume (PDF)</h3>
+    <input type="file" name="resume" required>
+    <button class="bg-green-500 px-4 py-2 rounded-lg ml-3">
+        Upload
+    </button>
+</form>
 
-<div class="glass p-4 mb-3" data-aos="fade-right">
-  <h5 class="section-title">Upload Resume</h5>
-  <form method="POST" enctype="multipart/form-data">
-    <input type="file" name="resume" class="form-control mb-2" required>
-    <button class="btn btn-gradient">Upload</button>
-  </form>
-</div>
+<h3 class="text-2xl font-semibold mb-4">Projects</h3>
 
-<div class="glass p-4" data-aos="fade-up">
-  <div class="d-flex justify-content-between mb-2">
-    <h5 class="section-title">Projects</h5>
-    <a href="/add-project" class="btn btn-sm btn-success">+ Add</a>
-  </div>
+{% for p in projects %}
+<div class="bg-white/10 p-4 rounded-lg mb-4">
+    <h4 class="font-bold text-cyan-400">{{ p.title }}</h4>
+    <p class="text-gray-400">{{ p.description }}</p>
+    <a href="{{ p.project_link }}" class="text-blue-400 underline">View Project</a>
+</div>
+{% endfor %}
 
-  {% for p in projects %}
-  <div class="border rounded p-3 mb-2">
-    <h6>{{ p.title }}</h6>
-    <p class="text-muted small">{{ p.description }}</p>
-    <a href="{{ p.project_link }}" target="_blank">View Project</a>
-  </div>
-  {% else %}
-  <p class="text-muted">No projects added yet.</p>
-  {% endfor %}
-</div>
-
-</div>
-</div>
+<a href="/add-project" class="bg-purple-500 px-5 py-2 rounded-lg">
+    + Add Project
+</a>
 
 {% endblock %}

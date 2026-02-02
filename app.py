@@ -5,19 +5,29 @@ from werkzeug.utils import secure_filename
 
 # ================= APP CONFIG =================
 app = Flask(__name__)
-app.secret_key = "super_secret_key_change_later"
+app.secret_key = os.getenv("SECRET_KEY", "fallback_secret")
+
 
 UPLOAD_FOLDER = os.path.join('static', 'resumes')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ================= DATABASE =================
+import os
+import mysql.connector
+
+import os
+import mysql.connector
+
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="SAI@02042007",
-    database="placement_portal"
+    host=os.getenv("MYSQLHOST", "localhost"),
+    user=os.getenv("MYSQLUSER", "root"),
+    password=os.getenv("MYSQLPASSWORD", "SAI@02042007"),
+    database=os.getenv("MYSQLDATABASE", "placement_portal"),
+    port=int(os.getenv("MYSQLPORT", 3306)),
+    auth_plugin="mysql_native_password"
 )
+
 cursor = db.cursor(dictionary=True)
 
 # ================= HOME =================
