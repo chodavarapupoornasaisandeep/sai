@@ -13,22 +13,18 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ================= DATABASE =================
-import os
-import mysql.connector
-
-import os
-import mysql.connector
-
 db = mysql.connector.connect(
-    host=os.getenv("MYSQLHOST", "localhost"),
-    user=os.getenv("MYSQLUSER", "root"),
-    password=os.getenv("MYSQLPASSWORD", "SAI@02042007"),
-    database=os.getenv("MYSQLDATABASE", "placement_portal"),
+    host=os.getenv("MYSQLHOST"),
+    user=os.getenv("MYSQLUSER"),
+    password=os.getenv("MYSQLPASSWORD"),
+    database=os.getenv("MYSQLDATABASE"),
     port=int(os.getenv("MYSQLPORT", 3306)),
     auth_plugin="mysql_native_password"
 )
 
 cursor = db.cursor(dictionary=True)
+
+
 
 # ================= HOME =================
 @app.route('/')
