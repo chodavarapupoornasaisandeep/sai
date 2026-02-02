@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- HERO -->
+<div class="glass p-4 mb-4" data-aos="fade-down">
+  <h2 class="section-title">
+    Welcome, <span class="text-primary">{{ student.name }}</span> 👋
+  </h2>
+  <p class="text-muted">{{ student.email }} • CGPA {{ student.cgpa }}</p>
+</div>
+
+<!-- JOBS -->
+<div class="glass p-4" data-aos="fade-up">
+  <h4 class="section-title mb-3">Available Opportunities</h4>
+
+  <table class="table table-hover align-middle text-center">
+    <thead>
+      <tr>
+        <th>Role</th>
+        <th>Company</th>
+        <th>Location</th>
+        <th>Type</th>
+        <th>CGPA</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for job in jobs %}
+      <tr data-aos="fade-left">
+        <td><strong>{{ job.role }}</strong></td>
+        <td>{{ job.company_name }}</td>
+        <td>{{ job.location }}</td>
+        <td><span class="badge bg-info">{{ job.job_type }}</span></td>
+        <td>{{ job.min_cgpa }}</td>
+        <td>
+          <form method="POST" action="/apply">
+            <input type="hidden" name="job_id" value="{{ job.job_id }}">
+            <button class="btn btn-gradient btn-sm">Apply</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

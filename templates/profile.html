@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row g-4">
+
+<!-- LEFT -->
+<div class="col-md-4">
+  <div class="glass p-4 text-center" data-aos="zoom-in">
+    <i class="bi bi-person-circle fs-1 text-primary"></i>
+    <h4 class="mt-2">{{ student.name }}</h4>
+    <p class="text-muted">{{ student.email }}</p>
+    <span class="badge bg-success">CGPA {{ student.cgpa }}</span>
+
+    {% if student.resume_path %}
+    <a href="/{{ student.resume_path }}" target="_blank"
+       class="btn btn-outline-primary w-100 mt-3">
+       View Resume
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="col-md-8">
+
+<div class="glass p-4 mb-3" data-aos="fade-right">
+  <h5 class="section-title">Upload Resume</h5>
+  <form method="POST" enctype="multipart/form-data">
+    <input type="file" name="resume" class="form-control mb-2" required>
+    <button class="btn btn-gradient">Upload</button>
+  </form>
+</div>
+
+<div class="glass p-4" data-aos="fade-up">
+  <div class="d-flex justify-content-between mb-2">
+    <h5 class="section-title">Projects</h5>
+    <a href="/add-project" class="btn btn-sm btn-success">+ Add</a>
+  </div>
+
+  {% for p in projects %}
+  <div class="border rounded p-3 mb-2">
+    <h6>{{ p.title }}</h6>
+    <p class="text-muted small">{{ p.description }}</p>
+    <a href="{{ p.project_link }}" target="_blank">View Project</a>
+  </div>
+  {% else %}
+  <p class="text-muted">No projects added yet.</p>
+  {% endfor %}
+</div>
+
+</div>
+</div>
+
+{% endblock %}
