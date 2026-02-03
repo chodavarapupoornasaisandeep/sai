@@ -1,16 +1,17 @@
-<nav class="navbar navbar-expand-lg navbar-dark shadow">
-  <div class="container-fluid px-4">
-    <a class="navbar-brand fw-semibold" href="/dashboard">
-      🎓 Placement Portal
-    </a>
+<div class="navbar">
+    <h2>🎓 Placement Portal</h2>
 
-    <ul class="navbar-nav ms-auto align-items-center">
-      <li class="nav-item mx-2"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-      <li class="nav-item mx-2"><a class="nav-link" href="/profile">Profile</a></li>
-      <li class="nav-item mx-2"><a class="nav-link" href="/my-applications">Applications</a></li>
-      <li class="nav-item mx-2">
-        <a class="btn btn-sm btn-outline-light" href="/logout">Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+    <div>
+        {% if session.get('admin_id') %}
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/profile">Profile</a>
+            <a href="/logout">Logout</a>
+
+        {% elif session.get('student_id') %}
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/my-applications">Applications</a>
+            <a href="/logout">Logout</a>
+        {% endif %}
+    </div>
+</div>

@@ -1,25 +1,22 @@
 {% extends "base.html" %}
-{% block title %}My Profile{% endblock %}
+{% block title %}Admin Profile{% endblock %}
 
 {% block content %}
 
-<!-- ================= STUDENT PROFILE ================= -->
 <div class="card">
     <div style="display:flex; align-items:center; gap:20px;">
 
-        <!-- Student Photo -->
-        <img src="/{{ student.photo_path if student.photo_path else 'static/default_user.png' }}"
+        <img src="/{{ admin.photo_path if admin.photo_path else 'static/default_user.png' }}"
              width="120"
              height="120"
              style="border-radius:50%; object-fit:cover; border:2px solid #ddd;">
 
-        <!-- Student Details -->
         <div>
-            <h2>{{ student.name }}</h2>
-            <p><b>Email:</b> {{ student.email }}</p>
-            <p><b>CGPA:</b> {{ student.cgpa }}</p>
+            <h2>{{ admin.username }}</h2>
+            <p><b>Role:</b> {{ admin.role }}</p>
+            <p><b>Company:</b> {{ company_name }}</p>
 
-            <!-- Upload / Change Photo (ONLY HERE) -->
+            <!-- Upload / Change Admin Photo -->
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="photo" accept="image/*" required>
                 <br><br>

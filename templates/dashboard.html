@@ -3,39 +3,62 @@
 
 {% block content %}
 
-<h2 class="text-3xl font-bold mb-6">
-    Welcome, <span class="text-cyan-400">{{ student.name }}</span>
-</h2>
+<!-- ================= STUDENT DASHBOARD HEADER ================= -->
+<div class="card">
+    <div style="display:flex; align-items:center; gap:20px;">
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-    <div class="bg-white/10 p-6 rounded-xl backdrop-blur hover:scale-105 transition">
-        <p class="text-gray-400">CGPA</p>
-        <h3 class="text-3xl font-bold text-green-400">{{ student.cgpa }}</h3>
-    </div>
+        <!-- Student Photo (VIEW ONLY) -->
+        <img src="/{{ student.photo_path if student.photo_path else 'static/default_user.png' }}"
+             width="120"
+             height="120"
+             style="border-radius:50%; object-fit:cover; border:2px solid #ddd;">
 
-    <div class="bg-white/10 p-6 rounded-xl backdrop-blur hover:scale-105 transition">
-        <p class="text-gray-400">Email</p>
-        <h3 class="font-semibold">{{ student.email }}</h3>
+        <!-- Student Info -->
+        <div>
+            <h2>Welcome, {{ student.name }}</h2>
+            <p>Email: {{ student.email }} | CGPA: {{ student.cgpa }}</p>
+        </div>
     </div>
 </div>
 
-<h3 class="text-2xl font-semibold mb-4">Available Jobs</h3>
+<!-- ================= AVAILABLE JOBS ================= -->
+<div class="card">
+    <h2>Available Jobs</h2>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-{% for job in jobs %}
-    <div class="bg-white/10 p-6 rounded-xl backdrop-blur hover:shadow-xl transition">
-        <h4 class="text-xl font-bold text-cyan-400">{{ job.role }}</h4>
-        <p class="text-gray-400">{{ job.company_name }} • {{ job.location }}</p>
-        <p class="mt-2">Min CGPA: <b>{{ job.min_cgpa }}</b></p>
+    {% if jobs %}
+    <table width="100%" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Min CGPA</th>
+                <th>Action</th>
+            </tr>
+        </thead>
 
-        <form method="POST" action="/apply" class="mt-4">
-            <input type="hidden" name="job_id" value="{{ job.job_id }}">
-            <button class="bg-cyan-500 px-4 py-2 rounded-lg hover:bg-cyan-600 transition">
-                Apply Now
-            </button>
-        </form>
-    </div>
-{% endfor %}
+        <tbody>
+        {% for job in jobs %}
+            <tr>
+                <td>{{ job.role }}</td>
+                <td>{{ job.company_name }}</td>
+                <td>{{ job.location }}</td>
+                <td>{{ job.job_type }}</td>
+                <td>{{ job.min_cgpa }}</td>
+                <td>
+                    <form method="POST" action="/apply">
+                        <input type="hidden" name="job_id" value="{{ job.job_id }}">
+                        <button type="submit">Apply</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No jobs available.</p>
+    {% endif %}
 </div>
 
 {% endblock %}

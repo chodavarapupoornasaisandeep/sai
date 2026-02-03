@@ -4,47 +4,146 @@
     <meta charset="UTF-8">
     <title>{% block title %}Placement Portal{% endblock %}</title>
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Alpine.js -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <!-- Icons -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a, #020617);
+            margin: 0;
+            background: #f4f6fb;
+            color: #1f2937;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            background: #4f46e5;
+            color: white;
+            padding: 14px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .navbar a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* ================= LAYOUT ================= */
+        .container {
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        h1, h2 {
+            margin-top: 0;
+        }
+
+        /* ================= BUTTON ================= */
+        button {
+            padding: 10px 18px;
+            background: #4f46e5;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        /* ================= TABLE ================= */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: #eef2ff;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        /* ================= STATUS ================= */
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .Applied {
+            background: #fde68a;
+        }
+
+        .Accepted {
+            background: #bbf7d0;
+        }
+
+        .Rejected {
+            background: #fecaca;
         }
     </style>
 </head>
-<body class="text-gray-100">
+<body>
 
-<!-- NAVBAR -->
-<nav class="bg-white/10 backdrop-blur-lg border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-cyan-400">
-            🚀 Placement Portal
-        </h1>
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+    <h2>🎓 Placement Portal</h2>
 
-        <div class="space-x-4">
-            <a href="/dashboard" class="hover:text-cyan-400">Dashboard</a>
-            <a href="/profile" class="hover:text-cyan-400">Profile</a>
-            <a href="/my-applications" class="hover:text-cyan-400">Applications</a>
-            <a href="/logout" class="text-red-400 hover:text-red-500">Logout</a>
-        </div>
+    <div>
+        {% if session.get('student_id') %}
+            <!-- STUDENT NAV -->
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/my-applications">Applications</a>
+            <a href="/logout">Logout</a>
+
+        {% elif session.get('admin_id') %}
+            <!-- ADMIN NAV -->
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/profile">Profile</a>
+            <a href="/logout">Logout</a>
+        {% endif %}
     </div>
-</nav>
+</div>
 
-<!-- PAGE CONTENT -->
-<main class="max-w-7xl mx-auto px-6 py-10">
+<!-- ================= CONTENT ================= -->
+<div class="container">
     {% block content %}{% endblock %}
-</main>
+</div>
 
 </body>
 </html>

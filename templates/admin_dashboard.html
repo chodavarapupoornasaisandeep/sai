@@ -1,47 +1,84 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
 {% block content %}
 
-<div class="glass p-4" data-aos="fade-up">
-<h4 class="section-title mb-3">Admin Dashboard</h4>
+<!-- ================= ADMIN PROFILE ================= -->
+<div class="card" style="margin-bottom:20px;">
+    <div style="display:flex; align-items:center; gap:20px;">
 
-<table class="table table-hover text-center">
-<thead>
-<tr>
-<th>Student</th>
-<th>Company</th>
-<th>Role</th>
-<th>Resume</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-{% for a in applications %}
-<tr>
-<td><a href="/admin/student/{{ a.student_id }}">{{ a.student_name }}</a></td>
-<td>{{ a.company_name }}</td>
-<td>{{ a.role }}</td>
-<td>
-{% if a.resume_path %}
-<a href="/{{ a.resume_path }}" target="_blank">View</a>
-{% endif %}
-</td>
-<td>{{ a.status }}</td>
-<td>
-<form method="POST" action="/admin/update-status">
-<input type="hidden" name="app_id" value="{{ a.application_id }}">
-<select name="status" class="form-select form-select-sm mb-1">
-<option>Applied</option>
-<option>Accepted</option>
-<option>Rejected</option>
-</select>
-<button class="btn btn-gradient btn-sm">Update</button>
-</form>
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+        <!-- Admin Photo -->
+        <img src="/{{ admin.photo_path if admin.photo_path else 'static/default_user.png' }}"
+             width="120"
+             height="120"
+             style="border-radius:50%; object-fit:cover; border:2px solid #ddd;">
+
+        <!-- Admin Details -->
+        <div>
+            <h2>Welcome, {{ admin_name }}</h2>
+            <p>
+                <b>Role:</b> {{ admin_role }} <br>
+                <b>Company:</b> {{ company_name }}
+            </p>
+
+         
+        </div>
+    </div>
+</div>
+
+<!-- ================= APPLICATIONS ================= -->
+<div class="card">
+    <h2>Student Applications</h2>
+
+    {% if applications %}
+    <table border="1" cellpadding="10" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for app in applications %}
+            <tr>
+                <td>
+                    <a href="/admin/student/{{ app.student_id }}">
+                        {{ app.student_name }}
+                    </a>
+                </td>
+                <td>{{ app.student_email }}</td>
+                <td>{{ app.role }}</td>
+                <td>
+                    {% if app.status == 'Accepted' %}
+                        <span style="color:green;font-weight:bold;">Accepted</span>
+                    {% elif app.status == 'Rejected' %}
+                        <span style="color:red;font-weight:bold;">Rejected</span>
+                    {% else %}
+                        <span style="color:orange;font-weight:bold;">Applied</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="/admin/update-status">
+                        <input type="hidden" name="app_id" value="{{ app.application_id }}">
+                        <select name="status">
+                            <option value="Applied" {% if app.status == 'Applied' %}selected{% endif %}>Applied</option>
+                            <option value="Accepted" {% if app.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No applications found.</p>
+    {% endif %}
 </div>
 
 {% endblock %}
