@@ -40,8 +40,8 @@ def login():
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.form['email']
+        password = request.form['password']
 
         cursor = db.cursor(dictionary=True)
         cursor.execute(
@@ -70,7 +70,8 @@ def dashboard():
 
     cursor.execute("""
         SELECT name, email, cgpa, photo_path
-        FROM students WHERE student_id=%s
+        FROM students
+        WHERE student_id=%s
     """, (session['student_id'],))
     student = cursor.fetchone()
 
@@ -83,30 +84,8 @@ def dashboard():
     jobs = cursor.fetchall()
 
     cursor.close()
-
     return render_template('dashboard.html', student=student, jobs=jobs)
 
-# ================= STUDENT PHOTO UPLOAD =================
-@app.route('/student/upload-photo', methods=['POST'])
-def student_upload_photo():
-    if 'student_id' not in session:
-        return redirect(url_for('login'))
-
-    photo = request.files.get('photo')
-    if photo and photo.filename.lower().endswith(('.jpg', '.png', '.jpeg')):
-        filename = secure_filename(f"student_{session['student_id']}.jpg")
-        path = os.path.join(app.config['STUDENT_PHOTO_FOLDER'], filename)
-        photo.save(path)
-
-        cursor = db.cursor()
-        cursor.execute(
-            "UPDATE students SET photo_path=%s WHERE student_id=%s",
-            (path, session['student_id'])
-        )
-        db.commit()
-        cursor.close()
-
-    return redirect(url_for('dashboard'))
 # ================= STUDENT PROFILE =================
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
@@ -115,29 +94,51 @@ def profile():
 
     cursor = db.cursor(dictionary=True)
 
-    # Upload photo
-    if request.method == 'POST' and 'photo' in request.files:
-        photo = request.files['photo']
-        if photo and photo.filename.lower().endswith(('.jpg', '.png', '.jpeg')):
-            filename = secure_filename(f"student_{session['student_id']}.jpg")
-            path = os.path.join(app.config['STUDENT_PHOTO_FOLDER'], filename)
-            photo.save(path)
+    # ---- UPDATE PROFILE DESCRIPTION ----
+    if request.method == 'POST' and 'description' in request.form:
+        cursor.execute("""
+            UPDATE students
+            SET profile_description=%s
+            WHERE student_id=%s
+        """, (request.form['description'], session['student_id']))
+        db.commit()
 
-            cursor.execute(
-                "UPDATE students SET photo_path=%s WHERE student_id=%s",
-                (path, session['student_id'])
-            )
+    # ---- UPLOAD RESUME ----
+    if request.method == 'POST' and 'resume' in request.files:
+        resume = request.files['resume']
+        if resume and resume.filename.lower().endswith('.pdf'):
+            filename = secure_filename(f"resume_{session['student_id']}.pdf")
+            path = os.path.join(app.config['RESUME_FOLDER'], filename)
+            resume.save(path)
+
+            cursor.execute("""
+                UPDATE students SET resume_path=%s WHERE student_id=%s
+            """, (path, session['student_id']))
             db.commit()
 
+    # ---- FETCH STUDENT ----
     cursor.execute("""
-        SELECT name, email, cgpa, photo_path
-        FROM students WHERE student_id=%s
+        SELECT name, email, cgpa, photo_path, profile_description, resume_path
+        FROM students
+        WHERE student_id=%s
     """, (session['student_id'],))
     student = cursor.fetchone()
 
+    # ---- FETCH PROJECTS ----
+    cursor.execute("""
+        SELECT title, description, project_link
+        FROM projects
+        WHERE student_id=%s
+    """, (session['student_id'],))
+    projects = cursor.fetchall()
+
     cursor.close()
 
-    return render_template('profile.html', student=student)
+    return render_template(
+        'profile.html',
+        student=student,
+        projects=projects
+    )
 
 
 # ================= MY APPLICATIONS =================
@@ -158,9 +159,7 @@ def my_applications():
 
     applications = cursor.fetchall()
     cursor.close()
-
     return render_template('my_applications.html', applications=applications)
-
 
 # ================= APPLY JOB =================
 @app.route('/apply', methods=['POST'])
@@ -169,10 +168,11 @@ def apply_job():
         return redirect(url_for('login'))
 
     cursor = db.cursor(dictionary=True, buffered=True)
-    cursor.execute(
-        "SELECT * FROM applications WHERE student_id=%s AND job_id=%s",
-        (session['student_id'], request.form['job_id'])
-    )
+
+    cursor.execute("""
+        SELECT * FROM applications
+        WHERE student_id=%s AND job_id=%s
+    """, (session['student_id'], request.form['job_id']))
 
     if cursor.fetchone():
         cursor.close()
@@ -187,12 +187,35 @@ def apply_job():
     cursor.close()
     return redirect(url_for('dashboard'))
 
+
+# ================= project route=================
+@app.route('/add-project', methods=['POST'])
+def add_project():
+    if 'student_id' not in session:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor()
+    cursor.execute("""
+        INSERT INTO projects (student_id, title, description, project_link)
+        VALUES (%s,%s,%s,%s)
+    """, (
+        session['student_id'],
+        request.form['title'],
+        request.form['description'],
+        request.form['link']
+    ))
+    db.commit()
+    cursor.close()
+
+    return redirect(url_for('profile'))
+
+
 # ================= ADMIN LOGIN =================
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = request.form['username']
+        password = request.form['password']
 
         cursor = db.cursor(dictionary=True)
         cursor.execute("""
@@ -213,11 +236,11 @@ def admin_login():
         session['company_id'] = admin['company_id']
         session['company_name'] = admin['company_name']
         session['admin_role'] = admin['role']
-        session['admin_photo'] = admin['photo_path']
 
         return redirect(url_for('admin_dashboard'))
 
     return render_template('admin_login.html')
+
 # ================= ADMIN DASHBOARD =================
 @app.route('/admin/dashboard')
 def admin_dashboard():
@@ -226,15 +249,13 @@ def admin_dashboard():
 
     cursor = db.cursor(dictionary=True)
 
-    # Fetch admin info
     cursor.execute("""
         SELECT username, role, photo_path
         FROM admin
-        WHERE admin_id = %s
+        WHERE admin_id=%s
     """, (session['admin_id'],))
     admin = cursor.fetchone()
 
-    # 🔒 FETCH ONLY THIS ADMIN'S COMPANY APPLICATIONS
     cursor.execute("""
         SELECT 
             a.application_id,
@@ -246,7 +267,7 @@ def admin_dashboard():
         FROM applications a
         JOIN students s ON a.student_id = s.student_id
         JOIN jobs j ON a.job_id = j.job_id
-        WHERE j.company_id = %s
+        WHERE j.company_id=%s
         ORDER BY a.application_id DESC
     """, (session['company_id'],))
 
@@ -256,58 +277,53 @@ def admin_dashboard():
     return render_template(
         'admin_dashboard.html',
         admin=admin,
+        applications=applications,
         admin_name=admin['username'],
         admin_role=admin['role'],
-        company_name=session['company_name'],
-        applications=applications
+        company_name=session['company_name']
     )
 
-# ================= ADMIN PROFILE =================
-@app.route('/admin/profile')
-def admin_profile():
+# ================= ADMIN → STUDENT PROFILE =================
+# ================= ADMIN → STUDENT PROFILE =================
+@app.route('/admin/student/<int:student_id>')
+def admin_student_profile(student_id):
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
 
     cursor = db.cursor(dictionary=True)
+
+    # Student details
     cursor.execute("""
-        SELECT username, role, photo_path
-        FROM admin
-        WHERE admin_id = %s
-    """, (session['admin_id'],))
-    admin = cursor.fetchone()
+        SELECT 
+            name,
+            email,
+            branch,
+            cgpa,
+            profile_description,
+            resume_path,
+            photo_path
+        FROM students
+        WHERE student_id = %s
+    """, (student_id,))
+    student = cursor.fetchone()
+
+    # Student projects
+    cursor.execute("""
+        SELECT title, description, project_link
+        FROM projects
+        WHERE student_id = %s
+    """, (student_id,))
+    projects = cursor.fetchall()
+
     cursor.close()
 
     return render_template(
-        'admin_profile.html',
-        admin=admin,
-        company_name=session.get('company_name')
+        'admin_student_profile.html',
+        student=student,
+        projects=projects
     )
 
-# ================= ADMIN PHOTO UPLOAD =================
-@app.route('/admin/upload-photo', methods=['POST'])
-def admin_upload_photo():
-    if 'admin_id' not in session:
-        return redirect(url_for('admin_login'))
-
-    photo = request.files.get('photo')
-    if photo and photo.filename.lower().endswith(('.jpg', '.png', '.jpeg')):
-        filename = secure_filename(f"admin_{session['admin_id']}.jpg")
-        path = os.path.join(app.config['ADMIN_PHOTO_FOLDER'], filename)
-        photo.save(path)
-
-        cursor = db.cursor()
-        cursor.execute(
-            "UPDATE admin SET photo_path=%s WHERE admin_id=%s",
-            (path, session['admin_id'])
-        )
-        db.commit()
-        cursor.close()
-
-        session['admin_photo'] = path
-
-    return redirect(url_for('admin_dashboard'))
-
-# ================= UPDATE STATUS =================
+# ================= UPDATE APPLICATION STATUS =================
 @app.route('/admin/update-status', methods=['POST'])
 def update_status():
     if 'admin_id' not in session:
@@ -320,8 +336,31 @@ def update_status():
     )
     db.commit()
     cursor.close()
-
     return redirect(url_for('admin_dashboard'))
+
+# ================= STUDENT RESUME UPLOAD =================
+@app.route('/upload-resume', methods=['POST'])
+def upload_resume():
+    if 'student_id' not in session:
+        return redirect(url_for('login'))
+
+    resume = request.files.get('resume')
+
+    if resume and resume.filename.lower().endswith('.pdf'):
+        filename = secure_filename(f"resume_{session['student_id']}.pdf")
+        path = os.path.join(app.config['RESUME_FOLDER'], filename)
+        resume.save(path)
+
+        cursor = db.cursor()
+        cursor.execute(
+            "UPDATE students SET resume_path=%s WHERE student_id=%s",
+            (path, session['student_id'])
+        )
+        db.commit()
+        cursor.close()
+
+    return redirect(url_for('profile'))
+
 
 # ================= LOGOUT =================
 @app.route('/logout')

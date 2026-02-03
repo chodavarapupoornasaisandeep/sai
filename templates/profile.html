@@ -3,30 +3,80 @@
 
 {% block content %}
 
-<!-- ================= STUDENT PROFILE ================= -->
+<!-- ================= BASIC INFO ================= -->
 <div class="card">
-    <div style="display:flex; align-items:center; gap:20px;">
+    <h2>{{ student.name }}</h2>
+    <p><b>Email:</b> {{ student.email }}</p>
+    <p><b>CGPA:</b> {{ student.cgpa }}</p>
 
-        <!-- Student Photo -->
-        <img src="/{{ student.photo_path if student.photo_path else 'static/default_user.png' }}"
-             width="120"
-             height="120"
-             style="border-radius:50%; object-fit:cover; border:2px solid #ddd;">
+    <img src="/{{ student.photo_path if student.photo_path else 'static/default_user.png' }}"
+         width="120" height="120"
+         style="border-radius:50%; margin-top:10px;">
+</div>
 
-        <!-- Student Details -->
-        <div>
-            <h2>{{ student.name }}</h2>
-            <p><b>Email:</b> {{ student.email }}</p>
-            <p><b>CGPA:</b> {{ student.cgpa }}</p>
+<!-- ================= PROFILE DESCRIPTION ================= -->
+<div class="card">
+    <h3>Profile Description</h3>
 
-            <!-- Upload / Change Photo (ONLY HERE) -->
-            <form method="POST" enctype="multipart/form-data">
-                <input type="file" name="photo" accept="image/*" required>
-                <br><br>
-                <button type="submit">Upload / Change Photo</button>
-            </form>
-        </div>
-    </div>
+    <form method="POST">
+        <textarea name="description"
+                  rows="4"
+                  style="width:100%;"
+                  placeholder="Write about yourself...">{{ student.profile_description }}</textarea>
+        <br><br>
+        <button type="submit">Save Description</button>
+    </form>
+</div>
+
+<!-- ================= RESUME UPLOAD ================= -->
+<div class="card">
+    <h3>Resume</h3>
+
+    {% if student.resume_path %}
+        <p>
+            <a href="/{{ student.resume_path }}" target="_blank">View Uploaded Resume</a>
+        </p>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="resume" accept=".pdf" required>
+        <br><br>
+        <button type="submit">Upload Resume</button>
+    </form>
+</div>
+
+<!-- ================= PROJECTS ================= -->
+<div class="card">
+    <h3>Projects</h3>
+
+    {% if projects %}
+        {% for p in projects %}
+            <div style="margin-bottom:15px;">
+                <b>{{ p.title }}</b><br>
+                {{ p.description }}<br>
+                {% if p.project_link %}
+                    <a href="{{ p.project_link }}" target="_blank">{{ p.project_link }}</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No projects added yet.</p>
+    {% endif %}
+
+    <hr>
+
+    <h4>Add New Project</h4>
+    <form method="POST" action="/add-project">
+        <input type="text" name="title" placeholder="Project Title" required><br><br>
+        <textarea name="description" placeholder="Project Description" required></textarea><br><br>
+        <input type="url" name="link" placeholder="Project Link (optional)"><br><br>
+        <button type="submit">Add Project</button>
+    </form>
+    <form method="POST" action="/upload-resume" enctype="multipart/form-data">
+    <input type="file" name="resume" accept=".pdf" required>
+    <button type="submit">Upload Resume</button>
+     </form>
+
 </div>
 
 {% endblock %}

@@ -1,33 +1,48 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% block title %}Student Profile{% endblock %}
+
 {% block content %}
 
-<div class="card shadow-soft mb-3">
-    <div class="card-body">
-        <h4>{{ student.name }}</h4>
-        <p>Email: {{ student.email }}</p>
-        <p>Branch: {{ student.branch }}</p>
-        <p>CGPA: {{ student.cgpa }}</p>
-        {% if student.resume_path %}
-        <a href="/{{ student.resume_path }}" target="_blank">View Resume</a>
-        {% endif %}
-    </div>
+<div class="card">
+    <h2>{{ student.name }}</h2>
+
+    <p><b>Email:</b> {{ student.email }}</p>
+    <p><b>Branch:</b> {{ student.branch }}</p>
+    <p><b>CGPA:</b> {{ student.cgpa }}</p>
+
+    {% if student.profile_description %}
+        <p><b>Profile Description:</b></p>
+        <p>{{ student.profile_description }}</p>
+    {% endif %}
+
+    {% if student.resume_path %}
+        <p>
+            <b>Resume:</b>
+            <a href="/{{ student.resume_path }}" target="_blank">Download</a>
+        </p>
+    {% else %}
+        <p><b>Resume:</b> Not uploaded</p>
+    {% endif %}
 </div>
 
-<div class="card shadow-soft">
-    <div class="card-header gradient-header">
-        Student Projects
-    </div>
-    <div class="card-body">
-        {% for p in projects %}
-        <div class="border rounded p-3 mb-2">
-            <h6>{{ p.title }}</h6>
-            <p class="text-muted small">{{ p.description }}</p>
-            <a href="{{ p.project_link }}" target="_blank">View Project</a>
-        </div>
-        {% else %}
-        <p class="text-muted">No projects found.</p>
+<div class="card">
+    <h3>Student Projects</h3>
+
+    {% if projects %}
+        <ul>
+        {% for project in projects %}
+            <li>
+                <b>{{ project.title }}</b><br>
+                {{ project.description }}<br>
+                {% if project.project_link %}
+                    <a href="{{ project.project_link }}" target="_blank">Project Link</a>
+                {% endif %}
+            </li>
         {% endfor %}
-    </div>
+        </ul>
+    {% else %}
+        <p>No projects found.</p>
+    {% endif %}
 </div>
 
 {% endblock %}

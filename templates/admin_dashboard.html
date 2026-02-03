@@ -7,7 +7,7 @@
 <div class="card" style="margin-bottom:20px;">
     <div style="display:flex; align-items:center; gap:20px;">
 
-        <!-- Admin Photo -->
+        <!-- Admin Photo (VIEW ONLY) -->
         <img src="/{{ admin.photo_path if admin.photo_path else 'static/default_user.png' }}"
              width="120"
              height="120"
@@ -20,13 +20,12 @@
                 <b>Role:</b> {{ admin_role }} <br>
                 <b>Company:</b> {{ company_name }}
             </p>
-
-         
         </div>
+
     </div>
 </div>
 
-<!-- ================= APPLICATIONS ================= -->
+<!-- ================= STUDENT APPLICATIONS ================= -->
 <div class="card">
     <h2>Student Applications</h2>
 
@@ -45,13 +44,18 @@
         <tbody>
         {% for app in applications %}
             <tr>
+                <!-- ✅ FIXED: Student name clickable -->
                 <td>
-                    <a href="/admin/student/{{ app.student_id }}">
-                        {{ app.student_name }}
-                    </a>
-                </td>
+             <a href="{{ url_for('admin_student_profile', student_id=app.student_id) }}">
+             {{ app.student_name }}
+             </a>
+                 </td>
+
+
+
                 <td>{{ app.student_email }}</td>
                 <td>{{ app.role }}</td>
+
                 <td>
                     {% if app.status == 'Accepted' %}
                         <span style="color:green;font-weight:bold;">Accepted</span>
@@ -61,6 +65,7 @@
                         <span style="color:orange;font-weight:bold;">Applied</span>
                     {% endif %}
                 </td>
+
                 <td>
                     <form method="POST" action="/admin/update-status">
                         <input type="hidden" name="app_id" value="{{ app.application_id }}">
